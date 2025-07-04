@@ -7,10 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { Check, Sparkles } from "lucide-react"
+import { Check, Sparkles, Calculator } from "lucide-react"
+import { StickyPricingSummary } from "@/components/sticky-pricing-summary"
+import { LeadQualificationModal } from "@/components/lead-qualification-modal"
 
 const modules = [
-  { id: "discovery", name: "Discovery & Roadmap", price: 750, essential: true },
+  { id: "discovery", name: "Discovery & Roadmap", price: 800, essential: true },
   { id: "ui-shell", name: "UI Shell (Tailwind + multilingual)", price: 1200, essential: true },
   { id: "auth", name: "Role-based Auth", price: 800, essential: false },
   { id: "crud", name: "Core CRUD modules", price: 1000, essential: true },
@@ -20,13 +22,20 @@ const modules = [
   { id: "handoff", name: "Handoff Docs", price: 300, essential: true },
 ]
 
-const bonusOption = { id: "figma", name: "Figma First design option", price: 500 }
+const bonusOption = { id: "figma", name: "Figma First design option", price: 600 }
 
 export function ModularBuffetSection() {
+  const minCost = modules
+    .filter(m => m.essential)
+    .reduce((sum, m) => sum + m.price, 0);
+
+  const maxCost = modules.reduce((sum, m) => sum + m.price, 0) + bonusOption.price;
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [selectedModules, setSelectedModules] = useState<string[]>(modules.filter((m) => m.essential).map((m) => m.id))
   const [includeFigma, setIncludeFigma] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [showStickySummary, setShowStickySummary] = useState(false)
 
   const handleModuleToggle = (moduleId: string, essential: boolean) => {
     if (essential) return // Can't uncheck essential modules
@@ -41,6 +50,15 @@ export function ModularBuffetSection() {
     const figmaTotal = includeFigma ? bonusOption.price : 0
     return moduleTotal + figmaTotal
   }
+
+  const getPricingTier = (total: number) => {
+    if (total <= 3000) return { name: "Starter MVP", color: "text-blue-600" }
+    if (total <= 5000) return { name: "Professional MVP", color: "text-purple-600" }
+    if (total <= 7000) return { name: "Premium MVP", color: "text-green-600" }
+    return { name: "Enterprise MVP", color: "text-orange-600" }
+  }
+
+  const currentTier = getPricingTier(calculateTotal())
 
   return (
     <section id="packages" ref={ref} className="py-24 bg-muted/30 relative overflow-hidden">
@@ -137,19 +155,39 @@ export function ModularBuffetSection() {
                 <div className="text-3xl font-bold mb-2">
                   Total: <span className="text-primary">${calculateTotal().toLocaleString()}</span>
                 </div>
+                <div className="text-lg font-medium mb-4">
+                  <span className={currentTier.color}>{currentTier.name}</span>
+                </div>
                 <p className="text-muted-foreground mb-6">
                   💸 Starting at $2,750 — All the way up to $8,500 for full branded MVPs.
                 </p>
                 <Button
                   size="lg"
+                  onClick={() => setShowModal(true)}
                   className="text-lg px-8 py-6 rounded-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   → Compose Your MVP Now
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setShowStickySummary(true)} className="mt-4">
+                  <Calculator className="w-4 h-4 mr-2" />
+                  Pin Pricing
                 </Button>
               </CardContent>
             </Card>
           </motion.div>
         </div>
+        <StickyPricingSummary
+          total={calculateTotal()}
+          tier={currentTier.name}
+          isVisible={showStickySummary}
+          onToggle={() => setShowStickySummary(!showStickySummary)}
+        />
+
+        <LeadQualificationModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          selectedTotal={calculateTotal()}
+        />
       </div>
     </section>
   )

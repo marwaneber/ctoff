@@ -1,15 +1,14 @@
 "use client"
 
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
-import { useRef, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import { Check, Sparkles, Calculator } from "lucide-react"
-import { StickyPricingSummary } from "@/components/sticky-pricing-summary"
 import { LeadQualificationModal } from "@/components/lead-qualification-modal"
+import { StickyPricingSummary } from "@/components/sticky-pricing-summary"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { motion, useInView } from "framer-motion"
+import { Calculator, Check, Sparkles } from "lucide-react"
+import { useRef, useState } from "react"
 
 const modules = [
   { id: "discovery", name: "Discovery & Roadmap", price: 800, essential: true },
@@ -62,6 +61,12 @@ export function ModularBuffetSection() {
 
   return (
     <section id="packages" ref={ref} className="py-24 bg-muted/30 relative overflow-hidden">
+      <StickyPricingSummary
+        total={calculateTotal()}
+        tier={currentTier.name}
+        isVisible={showStickySummary}
+        onToggle={() => setShowStickySummary(!showStickySummary)}
+      />
       {/* Abstract Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary/30 to-purple-600/30 rounded-full blur-3xl" />
@@ -159,7 +164,7 @@ export function ModularBuffetSection() {
                   <span className={currentTier.color}>{currentTier.name}</span>
                 </div>
                 <p className="text-muted-foreground mb-6">
-                  💸 Starting at $2,750 — All the way up to $8,500 for full branded MVPs.
+                  💸 Starting at ${minCost} — All the way up to ${maxCost} for full branded MVPs.
                 </p>
                 <Button
                   size="lg"
@@ -176,17 +181,13 @@ export function ModularBuffetSection() {
             </Card>
           </motion.div>
         </div>
-        <StickyPricingSummary
-          total={calculateTotal()}
-          tier={currentTier.name}
-          isVisible={showStickySummary}
-          onToggle={() => setShowStickySummary(!showStickySummary)}
-        />
+
 
         <LeadQualificationModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
           selectedTotal={calculateTotal()}
+          selectedModules={selectedModules}
         />
       </div>
     </section>

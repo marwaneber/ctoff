@@ -7,15 +7,112 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ArrowRight, ArrowLeft, CheckCircle } from "lucide-react"
+import { Toaster, toast } from "sonner"
 
 interface LeadQualificationModalProps {
   isOpen: boolean
   onClose: () => void
   selectedTotal: number
+  selectedModules: string[]
 }
+
+const countryPlaceholders: Record<string, string> = {
+  // North America
+  "+1": "612-345-6789", // US/Canada
+
+  // Europe
+  "+44": "7123 456789",     // UK
+  "+33": "6 12 34 56 78",   // France
+  "+49": "1512 3456789",    // Germany
+  "+34": "612 34 56 78",    // Spain
+  "+39": "312 345 6789",    // Italy
+  "+31": "6 12345678",      // Netherlands
+  "+32": "470 12 34 56",    // Belgium
+  "+46": "70 123 45 67",    // Sweden
+  "+47": "901 23 456",      // Norway
+  "+358": "40 123 4567",    // Finland
+  "+45": "12 34 56 78",     // Denmark
+  "+351": "912 345 678",    // Portugal
+  "+41": "79 123 45 67",    // Switzerland
+  "+43": "660 1234567",     // Austria
+  "+353": "87 123 4567",    // Ireland
+  "+48": "512 345 678",     // Poland
+  "+420": "601 123 456",    // Czech Republic
+  "+421": "912 345 678",    // Slovakia
+  "+36": "30 123 4567",     // Hungary
+  "+40": "712 345 678",     // Romania
+  "+359": "88 123 4567",    // Bulgaria
+  "+30": "691 234 5678",    // Greece
+  "+386": "31 234 567",     // Slovenia
+  "+385": "91 123 4567",    // Croatia
+  "+371": "21 234 567",     // Latvia
+  "+370": "612 34567",      // Lithuania
+  "+372": "5123 4567",      // Estonia
+
+  // MENA
+  "+971": "50 123 4567",    // UAE
+  "+974": "33X XXXX",       // Qatar
+  "+966": "5X XXX XXXX",    // Saudi Arabia
+  "+965": "500 12345",      // Kuwait
+  "+973": "3600 1234",      // Bahrain
+  "+968": "9123 4567",      // Oman
+};
+
+
+const countryCodes = [
+  {
+    group: "North America",
+    codes: [
+      { label: "🇺🇸🇨🇦 +1 (US/Canada)", value: "+1" },
+    ],
+  },
+  {
+    group: "Europe",
+    codes: [
+      { label: "🇬🇧 +44 (UK)", value: "+44" },
+      { label: "🇫🇷 +33 (France)", value: "+33" },
+      { label: "🇩🇪 +49 (Germany)", value: "+49" },
+      { label: "🇪🇸 +34 (Spain)", value: "+34" },
+      { label: "🇮🇹 +39 (Italy)", value: "+39" },
+      { label: "🇳🇱 +31 (Netherlands)", value: "+31" },
+      { label: "🇧🇪 +32 (Belgium)", value: "+32" },
+      { label: "🇸🇪 +46 (Sweden)", value: "+46" },
+      { label: "🇳🇴 +47 (Norway)", value: "+47" },
+      { label: "🇫🇮 +358 (Finland)", value: "+358" },
+      { label: "🇩🇰 +45 (Denmark)", value: "+45" },
+      { label: "🇵🇹 +351 (Portugal)", value: "+351" },
+      { label: "🇨🇭 +41 (Switzerland)", value: "+41" },
+      { label: "🇦🇹 +43 (Austria)", value: "+43" },
+      { label: "🇮🇪 +353 (Ireland)", value: "+353" },
+      { label: "🇵🇱 +48 (Poland)", value: "+48" },
+      { label: "🇨🇿 +420 (Czech Republic)", value: "+420" },
+      { label: "🇸🇰 +421 (Slovakia)", value: "+421" },
+      { label: "🇭🇺 +36 (Hungary)", value: "+36" },
+      { label: "🇷🇴 +40 (Romania)", value: "+40" },
+      { label: "🇧🇬 +359 (Bulgaria)", value: "+359" },
+      { label: "🇬🇷 +30 (Greece)", value: "+30" },
+      { label: "🇸🇮 +386 (Slovenia)", value: "+386" },
+      { label: "🇭🇷 +385 (Croatia)", value: "+385" },
+      { label: "🇱🇻 +371 (Latvia)", value: "+371" },
+      { label: "🇱🇹 +370 (Lithuania)", value: "+370" },
+      { label: "🇪🇪 +372 (Estonia)", value: "+372" },
+    ],
+  },
+  {
+    group: "MENA (Gulf & Levant)",
+    codes: [
+      { label: "🇦🇪 +971 (UAE)", value: "+971" },
+      { label: "🇶🇦 +974 (Qatar)", value: "+974" },
+      { label: "🇸🇦 +966 (Saudi Arabia)", value: "+966" },
+      { label: "🇰🇼 +965 (Kuwait)", value: "+965" },
+      { label: "🇧🇭 +973 (Bahrain)", value: "+973" },
+      { label: "🇴🇲 +968 (Oman)", value: "+968" },
+    ],
+  },
+];
 
 const steps = [
   {
@@ -32,11 +129,16 @@ const steps = [
   },
 ]
 
-export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQualificationModalProps) {
+type FormField = "name" | "email" | "company" | "idea" | "timeline" | "budget" | "stage" | "team" | "priority" | "whatsapp" | "countryCode";
+type FormData = Record<FormField, string>;
+
+export function LeadQualificationModal({ isOpen, onClose, selectedTotal, selectedModules }: LeadQualificationModalProps) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
+    countryCode: "+1", // Default to Morocco
+    whatsapp: "", // Optional field for WhatsApp
     company: "",
     idea: "",
     timeline: "",
@@ -46,13 +148,82 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
     priority: "",
   })
 
+  const phonePlaceholder = countryPlaceholders[formData.countryCode] || "Enter phone number";
+  const selectedCountryCode = formData.countryCode || "+1"; // Default to +1 if not set
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
+      // Validate current step
+      const currentFields = steps[currentStep].fields as FormField[]
+      console.log("Validating fields:", currentFields)
+      const isValid = currentFields.every((field) => {
+        const value = formData[field]
+        if (field === "email") {
+          // Simple email validation
+          return value && /\S+@\S+\.\S+/.test(value)
+        }
+        return value && value.trim() !== ""
+      })
+      console.log("Is valid:", isValid)
+      if (!isValid) {
+        toast.error("Please fill in all required fields correctly.")
+        return
+      }
       setCurrentStep(currentStep + 1)
     } else {
       // Submit form
       console.log("Form submitted:", formData)
-      onClose()
+      // Here you would typically send the data to your API
+      // For example:
+      setLoading(true)
+      setError("")
+      setSuccess(false)
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          services: selectedModules, // array of module ids/names
+        }),
+      }).then((response) => {
+        if (response.ok) {
+          console.log("Lead submitted successfully")
+          toast.success("Thank you! Your lead has been submitted.")
+          setSuccess(true)
+          setFormData({
+            name: "",
+            email: "",
+            countryCode: "+1", // Reset to default country code
+            whatsapp: selectedCountryCode + "", // Reset WhatsApp field
+            company: "",
+            idea: "",
+            timeline: "",
+            budget: "",
+            stage: "",
+            team: "",
+            priority: "",
+          })
+          setCurrentStep(0)
+          onClose()
+        } else {
+          toast.error("Failed to submit lead. Please try again later.")
+          console.error("Error submitting lead")
+          response.json().then(data => {
+            setError(data.error || "Submission failed")
+          })
+        }
+      }).catch((error) => {
+        toast.error("Network error. Please check your connection.")
+        console.error("Network error:", error)
+        setError("Network error")
+      }).finally(() => {
+        setLoading(false)
+      })
     }
   }
 
@@ -66,18 +237,22 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleChange = (e: { target: { name: any; value: any } }) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <Toaster position="top-center" richColors className="z-10" />
         <DialogHeader>
           <DialogTitle className="text-2xl">Let's Build Your MVP</DialogTitle>
           <div className="flex items-center space-x-2 mt-4">
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`h-2 flex-1 rounded-full transition-colors ${
-                  index <= currentStep ? "bg-primary" : "bg-muted"
-                }`}
+                className={`h-2 flex-1 rounded-full transition-colors ${index <= currentStep ? "bg-primary" : "bg-muted"
+                  }`}
               />
             ))}
           </div>
@@ -96,32 +271,73 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
 
             {currentStep === 0 && (
               <div className="space-y-4">
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="name">Full Name *</Label>
                   <Input
                     id="name"
+                    name="name"
                     value={formData.name}
-                    onChange={(e) => updateFormData("name", e.target.value)}
+                    onChange={handleChange}
                     placeholder="Your full name"
+                    required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => updateFormData("email", e.target.value)}
+                    onChange={handleChange}
                     placeholder="your@email.com"
+                    required
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp *</Label>
+                  <div className="flex gap-2">
+                    <div className="w-34">
+                      <Select value={formData.countryCode} onValueChange={(value) => updateFormData("countryCode", value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select country code" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countryCodes.map(({ group, codes }) => (
+                            <SelectGroup key={group}>
+                              <SelectLabel>{group}</SelectLabel>
+                              {codes.map(({ label, value }) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Input
+                      id="whatsapp"
+                      name="whatsapp"
+                      type="tel"
+                      placeholder={phonePlaceholder}
+                      value={formData.whatsapp}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 w-full"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="company">Company</Label>
                   <Input
                     id="company"
+                    name="company"
                     value={formData.company}
-                    onChange={(e) => updateFormData("company", e.target.value)}
+                    onChange={handleChange}
                     placeholder="Your company name"
+                    required
                   />
                 </div>
               </div>
@@ -129,18 +345,21 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
 
             {currentStep === 1 && (
               <div className="space-y-4">
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="idea">Project Idea *</Label>
                   <Textarea
                     id="idea"
+                    name="idea"
                     value={formData.idea}
-                    onChange={(e) => updateFormData("idea", e.target.value)}
+                    onChange={handleChange}
                     placeholder="Describe your project in a few sentences..."
                     rows={3}
+                    required
+                    minLength={20}
                   />
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label>Timeline</Label>
                     <Select value={formData.timeline} onValueChange={(value) => updateFormData("timeline", value)}>
                       <SelectTrigger>
@@ -154,14 +373,14 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
+                  <div className="space-y-2">
                     <Label>Budget Range</Label>
-                    <Select value={formData.budget} onValueChange={(value) => updateFormData("budget", value)}>
+                    <Select value={formData.budget} onValueChange={(value) => updateFormData("budget", value)} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select budget" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="2k-5k">$2k - $5k</SelectItem>
+                        <SelectItem value="3.7k-5k">$3.7k - $5k</SelectItem>
                         <SelectItem value="5k-10k">$5k - $10k</SelectItem>
                         <SelectItem value="10k+">$10k+</SelectItem>
                         <SelectItem value="discuss">Let's discuss</SelectItem>
@@ -174,12 +393,13 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <div>
+                <div className="space-y-2">
                   <Label className="text-base font-medium">What stage is your project?</Label>
                   <RadioGroup
                     value={formData.stage}
                     onValueChange={(value: string) => updateFormData("stage", value)}
                     className="mt-2"
+                    required
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="idea" id="idea" />
@@ -196,12 +416,13 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
                   </RadioGroup>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label className="text-base font-medium">Do you have a technical team?</Label>
                   <RadioGroup
                     value={formData.team}
                     onValueChange={(value: string) => updateFormData("team", value)}
                     className="mt-2"
+                    required
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="none" id="none" />
@@ -233,8 +454,8 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
                 Back
               </Button>
             )}
-            <Button onClick={handleNext}>
-              {currentStep === steps.length - 1 ? (
+            <Button onClick={handleNext} disabled={loading}>
+              {loading ? "Submitting..." : currentStep === steps.length - 1 ? (
                 <>
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Submit
@@ -248,6 +469,9 @@ export function LeadQualificationModal({ isOpen, onClose, selectedTotal }: LeadQ
             </Button>
           </div>
         </div>
+
+        {error && <div className="text-red-500 mt-4">{error}</div>}
+        {success && <div className="text-green-500 mt-4">Thank you! We'll be in touch.</div>}
       </DialogContent>
     </Dialog>
   )

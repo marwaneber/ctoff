@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to VPS (Development)
+      - name: Deploy to Development VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -23,5 +23,6 @@ jobs:
             cd /var/www/dev.ctoff.com
             git pull origin dev
             npm install
-            pm2 restart ctoff-dev || pm2 start npm --name "ctoff-dev" -- run dev
-
+            npm run build
+            pm2 delete ctoff-dev || true
+            pm2 start "npm run start" --name=ctoff-dev -- -p 3011

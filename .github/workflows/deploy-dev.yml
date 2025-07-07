@@ -1,0 +1,27 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to VPS (Development)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEV_VPS_HOST }}
+          username: ${{ secrets.DEV_VPS_USER }}
+          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/dev.ctoff.com
+            git pull origin dev
+            npm install
+            pm2 restart ctoff-dev || pm2 start npm --name "ctoff-dev" -- run dev
+

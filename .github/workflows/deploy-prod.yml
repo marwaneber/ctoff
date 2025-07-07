@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to VPS
+      - name: Deploy to Production VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -24,4 +24,5 @@ jobs:
             git pull origin master
             npm install --production
             npm run build
-            pm2 restart ctoff
+            pm2 delete ctoff || true
+            pm2 start "npm run start" --name=ctoff -- -p 3010

@@ -6,7 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start -p 3010"
+    "start": "next start -p 3011"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

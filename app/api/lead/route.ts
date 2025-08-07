@@ -1,37 +1,59 @@
-import { type NextRequest, NextResponse } from "next/server"
+// app/api/lead/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { Client } from "@notionhq/client";
 
-export async function POST(request: NextRequest) {
+const notion = new Client({ auth: process.env.NOTION_TOKEN });
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const {
+    name,
+    email,
+    countryCode,
+    whatsapp,
+    idea,
+    timeline,
+    budget,
+    services,
+  } = body;
+  console.log("Received data:", JSON.stringify(body));
   try {
-    const body = await request.json()
+    await notion.pages.create({
+      parent: { database_id: process.env.NOTION_DATABASE_ID! },
+      properties: {
+        Name: {
+          title: [{ text: { content: name || "" } }],
+        },
+        Email: {
+          email: email || "",
+        },
+        WhatsApp: {
+          rich_text: [{ text: { content: `${countryCode}${whatsapp}` || "" } }],
+        },
+        Idea: {
+          rich_text: [{ text: { content: idea || "" } }],
+        },
+        Timeline: {
+          select: { name: timeline || "Unspecified" },
+        },
+        // CountryCode: {
+        //   select: { name: countryCode || 'Unspecified' },
+        // },
+        Budget: {
+          rich_text: [{ text: { content: budget } }],
+        },
+        Services: {
+          multi_select: services?.map((s: string) => ({ name: s })) || [],
+        },
+      },
+    });
 
-    // Validate required fields
-    if (!body.name || !body.email || !body.idea) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    // In a real application, you would:
-    // 1. Save to database
-    // 2. Send email notification
-    // 3. Add to CRM
-    // 4. Send confirmation email
-
-    console.log("New lead submission:", {
-      name: body.name,
-      email: body.email,
-      whatsapp: body.whatsapp,
-      idea: body.idea,
-      timeline: body.timeline,
-      budget: body.budget,
-      services: body.services,
-      timestamp: new Date().toISOString(),
-    })
-
-    // Simulate processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    return NextResponse.json({ message: "Lead submitted successfully" }, { status: 200 })
-  } catch (error) {
-    console.error("Error processing lead:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Notion Error:", err);
+    return NextResponse.json(
+      { error: "Failed to add to Notion" },
+      { status: 500 },
+    );
   }
 }

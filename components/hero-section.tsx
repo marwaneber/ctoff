@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Calendar, Package } from "lucide-react"
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Calendar, Package } from "lucide-react";
 
 export function HeroSection() {
   const scrollToPackages = () => {
-    document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" })
-  }
+    document.getElementById("packages")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -61,7 +61,7 @@ export function HeroSection() {
           </motion.div>
 
           <motion.h1
-            className="text-5xl md:text-7xl font-bold tracking-tight leading-tight"
+            className="text-4xl md:text-6xl font-bold tracking-tight leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -74,13 +74,14 @@ export function HeroSection() {
           </motion.h1>
 
           <motion.p
-            className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+            className="text-md md:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            From sketch to scale, I turn raw ideas into elegant, production-ready software — with the precision of an
-            engineer and the vision of a founder.
+            From sketch to scale, I turn raw ideas into elegant,
+            production-ready software — with the precision of an engineer and
+            the vision of a founder.
           </motion.p>
 
           <motion.div
@@ -89,7 +90,7 @@ export function HeroSection() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="space-y-4"
           >
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-lg">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-md">
               <div className="flex items-center text-muted-foreground">
                 <ArrowRight className="w-5 h-5 mr-2 text-primary" />
                 Get your MVP built.
@@ -113,12 +114,17 @@ export function HeroSection() {
           >
             <Button
               size="lg"
+              onClick={() =>
+                document
+                  .getElementById("packages")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="text-lg px-8 py-6 rounded-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Calendar className="mr-2 h-5 w-5" />
               Book a 1:1 Strategy Call
             </Button>
-            <Button
+            {/*<Button
               size="lg"
               variant="outline"
               onClick={scrollToPackages}
@@ -126,10 +132,10 @@ export function HeroSection() {
             >
               <Package className="mr-2 h-5 w-5" />
               See Packages
-            </Button>
+            </Button>*/}
           </motion.div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

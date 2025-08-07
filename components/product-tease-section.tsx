@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion";
+import { useInView } from "framer-motion";
+import { useRef } from "react";
 
 export function ProductTeaseSection() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const features = ["UI", "Infra", "Speed"]
+  const features = ["UI", "Infra", "Speed"];
 
   return (
     <section ref={ref} className="py-24 bg-muted/30 relative overflow-hidden">
@@ -40,10 +40,12 @@ export function ProductTeaseSection() {
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <p className="text-2xl font-semibold text-foreground">Not a freelancer. Not an agency. A partner.</p>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              CTOFF isn't here to deliver lines of code — it's here to bring clarity, sharpness, and real execution to
-              your product.
+            <p className="text-2xl md:text-3xl font-semibold text-foreground">
+              Not a freelancer. Not an agency. A partner.
+            </p>
+            <p className="text-lg md:text-2xl text-muted-foreground leading-relaxed">
+              CTOFF isn't here to deliver lines of code — it's here to bring
+              clarity, sharpness, and real execution to your product.
             </p>
           </motion.div>
 
@@ -54,7 +56,11 @@ export function ProductTeaseSection() {
                 <motion.div
                   key={feature}
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={isInView ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.8, y: 20 }}
+                  animate={
+                    isInView
+                      ? { opacity: 1, scale: 1, y: 0 }
+                      : { opacity: 0, scale: 0.8, y: 20 }
+                  }
                   transition={{ duration: 0.6, delay: 0.6 + index * 0.2 }}
                   className="w-24 h-24 bg-gradient-to-br from-primary/20 to-purple-600/20 rounded-2xl flex items-center justify-center border-2 border-primary/20 backdrop-blur-sm"
                 >
@@ -65,7 +71,9 @@ export function ProductTeaseSection() {
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+              animate={
+                isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }
+              }
               transition={{ duration: 0.8, delay: 1.2 }}
               className="text-xl font-semibold text-primary"
             >
@@ -84,15 +92,23 @@ export function ProductTeaseSection() {
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-primary rounded-full mt-3 mr-4 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold mb-1">UI so intuitive it explains itself</h4>
-                  <p className="text-muted-foreground text-sm">Clean interfaces that users understand instantly</p>
+                  <h4 className="font-semibold mb-1">
+                    UI so intuitive it explains itself
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    Clean interfaces that users understand instantly
+                  </p>
                 </div>
               </div>
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-primary rounded-full mt-3 mr-4 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold mb-1">Architectures that scale with your ambition</h4>
-                  <p className="text-muted-foreground text-sm">Built to grow from MVP to enterprise</p>
+                  <h4 className="font-semibold mb-1">
+                    Architectures that scale with your ambition
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    Built to grow from MVP to enterprise
+                  </p>
                 </div>
               </div>
             </div>
@@ -100,15 +116,23 @@ export function ProductTeaseSection() {
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-primary rounded-full mt-3 mr-4 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold mb-1">Delivery that builds trust from week one</h4>
-                  <p className="text-muted-foreground text-sm">Consistent progress, clear communication</p>
+                  <h4 className="font-semibold mb-1">
+                    Delivery that builds trust from week one
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    Consistent progress, clear communication
+                  </p>
                 </div>
               </div>
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-primary rounded-full mt-3 mr-4 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold mb-1">No noise. No fluff. Just clean, focused product engineering.</h4>
-                  <p className="text-muted-foreground text-sm">Every line of code serves a purpose</p>
+                  <h4 className="font-semibold mb-1">
+                    No noise. No fluff. Just clean, focused product engineering.
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    Every line of code serves a purpose
+                  </p>
                 </div>
               </div>
             </div>
@@ -116,5 +140,5 @@ export function ProductTeaseSection() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

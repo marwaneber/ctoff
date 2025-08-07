@@ -20,9 +20,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/dev.ctoff.com
+            cd /dev/ctoff-dev
             git pull origin dev
             npm install
             npm run build
             pm2 delete ctoff-dev || true
-            pm2 start "npm run start" --name=ctoff-dev -- -p 3011
+            pm2 start "npm run start -- --port=3011" --name=ctoff-dev
